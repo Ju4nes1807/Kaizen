@@ -1,0 +1,21 @@
+# Cache de python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cache de herramientas
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Cobertura
+.coverage
+htmlcov/
+
+# Variables de entorno
+.env
+.env.*
+
+# Archivos temporales
+*.log
+*.tmp
