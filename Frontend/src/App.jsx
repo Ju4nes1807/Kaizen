@@ -44,7 +44,7 @@ function getViewFromHash() {
 
 function getStoredUser() {
   try {
-    return JSON.parse(sessionStorage.getItem("kaizen-google-user"));
+    return JSON.parse(sessionStorage.getItem("kaizen-google-user") || sessionStorage.getItem("kaizen-email-user"));
   } catch {
     return null;
   }
@@ -84,9 +84,24 @@ export default function App() {
     window.location.hash = "inicio";
   }
 
+  function handleEmailSuccess({ email, tokens }) {
+    const emailUser = {
+      name: email.split("@")[0],
+      email,
+    };
+
+    sessionStorage.setItem("kaizen-email-user", JSON.stringify(emailUser));
+    sessionStorage.setItem("kaizen-tokens", JSON.stringify(tokens));
+    setUser(emailUser);
+    window.location.hash = "inicio";
+  }
+
   function handleLogout() {
     sessionStorage.removeItem("kaizen-google-user");
+    sessionStorage.removeItem("kaizen-email-user");
+    sessionStorage.removeItem("kaizen-tokens");
     setUser(null);
+    window.location.hash = "inicio";
   }
 
   if (view === "login" || view === "registro") {
@@ -95,3 +110,5 @@ export default function App() {
 
   return <HomePage user={user} onLogout={handleLogout} />;
 }
+
+

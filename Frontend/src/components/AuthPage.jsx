@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import GoogleAuthButton from "./GoogleAuthButton";
+import { registerUser, loginUser } from "../services/authService";
 
-export default function AuthPage({ mode, onGoogleSuccess }) {
+export default function AuthPage({ mode, onGoogleSuccess, onEmailSuccess }) {
   const isRegister = mode === "registro";
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState(null);
@@ -18,16 +19,39 @@ export default function AuthPage({ mode, onGoogleSuccess }) {
     });
   }
 
-  function handleEmailSubmit(event) {
+  async function handleEmailSubmit(event) {
     event.preventDefault();
-    setMessage({
-      type: "info",
-      text: isRegister
-        ? "El formulario está listo. Falta conectarlo al servicio que guardará las cuentas."
-        : "El formulario está listo. Falta conectarlo al servicio que validará tus datos.",
-    });
-  }
 
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+
+    setMessage({ type: "info", text: "Procesando..." });
+
+    try {
+      if (isRegister) {
+        await registerUser({
+          first_name: String(formData.get("name") || "").trim(),
+          email,
+          password,
+        });
+
+        setMessage({
+          type: "success",
+          text: "¡Cuenta creada! Ahora puedes iniciar sesión.",
+        });
+      } else {
+        const tokens = await loginUser({ email, password });
+
+        onEmailSuccess?.({ email, tokens });
+      }
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error.message || "Ocurrió un error. Inténtalo de nuevo.",
+      });
+    }
+  }
   return (
     <div className="auth-page">
       <header className="auth-header">
@@ -233,3 +257,7 @@ export default function AuthPage({ mode, onGoogleSuccess }) {
     </div>
   );
 }
+
+
+
+
